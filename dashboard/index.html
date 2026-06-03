@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluestock Mutual Fund Analytics Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-chart-line brand-icon"></i>
+                <div class="brand-text">
+                    <h1>Bluestock</h1>
+                    <span>MF Analytics</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-page="industry"><i class="fa-solid fa-landmark"></i> Industry Overview</a>
+                <a href="#" class="nav-item" data-page="performance"><i class="fa-solid fa-gauge-high"></i> Fund Performance</a>
+                <a href="#" class="nav-item" data-page="investors"><i class="fa-solid fa-users"></i> Investor Analytics</a>
+                <a href="#" class="nav-item" data-page="risk"><i class="fa-solid fa-triangle-exclamation"></i> Risk Analytics</a>
+                <a href="#" class="nav-item" data-page="recommendations"><i class="fa-solid fa-wand-magic-sparkles"></i> Recommendations</a>
+            </nav>
+
+            <!-- Sidebar Filters -->
+            <div class="sidebar-filters">
+                <h3><i class="fa-solid fa-sliders"></i> Global Filters</h3>
+                
+                <div class="filter-group">
+                    <label for="category-select">Scheme Category</label>
+                    <select id="category-select" class="filter-control">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="amc-select">Fund House (AMC)</label>
+                    <select id="amc-select" class="filter-control">
+                        <option value="">All AMCs</option>
+                    </select>
+                </div>
+
+                <button id="reset-filters" class="btn btn-secondary btn-block">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Filters
+                </button>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>Data updated: May 2026</p>
+                <span class="status-badge"><i class="fa-solid fa-circle-check"></i> System Online</span>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard View Area -->
+        <main class="main-content">
+            <!-- Header bar -->
+            <header class="top-bar">
+                <div class="page-title-area">
+                    <h2 id="current-page-title">Industry Overview</h2>
+                    <p id="current-page-desc">Comprehensive insights into the Indian Mutual Fund industry assets, SIP accounts, and folios.</p>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-regular fa-user"></i></div>
+                    <div class="profile-info">
+                        <span class="username">Gokula Priya</span>
+                        <span class="role">Lead Analyst</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- KPI Row (Shared / Dynamic) -->
+            <section class="kpi-grid">
+                <div class="kpi-card" id="kpi-aum">
+                    <div class="kpi-icon"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="kpi-content">
+                        <h3>Total Managed AUM</h3>
+                        <div class="value">₹<span class="kpi-val">0.00</span> Cr</div>
+                        <span class="trend positive"><i class="fa-solid fa-caret-up"></i> Active tracking</span>
+                    </div>
+                </div>
+                <div class="kpi-card" id="kpi-sip">
+                    <div class="kpi-icon"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+                    <div class="kpi-content">
+                        <h3>Monthly SIP Inflows</h3>
+                        <div class="value">₹<span class="kpi-val">0.00</span> Cr</div>
+                        <span class="trend positive" id="sip-month-lbl">Latest Month</span>
+                    </div>
+                </div>
+                <div class="kpi-card" id="kpi-folios">
+                    <div class="kpi-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    <div class="kpi-content">
+                        <h3>Industry Folios</h3>
+                        <div class="value"><span class="kpi-val">0.00</span> Cr</div>
+                        <span class="trend positive">Retail accounts</span>
+                    </div>
+                </div>
+                <div class="kpi-card" id="kpi-schemes">
+                    <div class="kpi-icon"><i class="fa-solid fa-cubes"></i></div>
+                    <div class="kpi-content">
+                        <h3>Monitored Schemes</h3>
+                        <div class="value"><span class="kpi-val">0</span></div>
+                        <span class="trend">Unique AMFI listings</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 1: INDUSTRY OVERVIEW -->
+            <div id="page-industry" class="dashboard-page active">
+                <div class="dashboard-grid">
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>Monthly SIP Inflows Growth (₹ Crore)</h3>
+                            <p>Trend of regular monthly contributions in mutual funds</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-sip-inflow"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>AUM Share by AMC (Top Fund Houses)</h3>
+                            <p>Asset distribution under active management</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-aum-share"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>Active SIP Accounts vs New Registrations</h3>
+                            <p>Quarterly retail investor signup momentum</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-active-vs-new-sip"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>Industry Folio Growth by Asset Class</h3>
+                            <p>Quarterly registration growth across Equity, Debt, and Hybrid schemes</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-folios-trends"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: FUND PERFORMANCE & SCORECARD -->
+            <div id="page-performance" class="dashboard-page">
+                <div class="dashboard-grid">
+                    <!-- Scatter plot -->
+                    <div class="grid-card col-span-4">
+                        <div class="card-header">
+                            <h3>Risk vs Return Matrix (3-Year returns vs Std Dev)</h3>
+                            <p>Lower right quadrant represents high risk-adjusted performance (higher Sharpe)</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-risk-return"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Expense Ratios bar -->
+                    <div class="grid-card col-span-2">
+                        <div class="card-header">
+                            <h3>Expense Ratios of Selected Category</h3>
+                            <p>Showing relative cost of investment (lower is better)</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-expense-ratios"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Performance Scorecard Table -->
+                    <div class="grid-card col-span-6">
+                        <div class="card-header header-with-actions">
+                            <div>
+                                <h3>Mutual Fund Performance Scorecard</h3>
+                                <p>Ranks are computed from a composite weight of Sharpe, Alpha, CAGR, and Drawdowns.</p>
+                            </div>
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="scorecard-search" placeholder="Search scheme...">
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table" id="scorecard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Scheme Name</th>
+                                        <th>Category</th>
+                                        <th>AMC</th>
+                                        <th class="text-right">CAGR (3Y)</th>
+                                        <th class="text-right">Sharpe Ratio</th>
+                                        <th class="text-right">Beta</th>
+                                        <th class="text-right">Alpha (CAPM)</th>
+                                        <th class="text-right">Max Drawdown</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: INVESTOR ANALYTICS -->
+            <div id="page-investors" class="dashboard-page">
+                <div class="dashboard-grid">
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>Investor Age Profile & Gender Value Breakdown</h3>
+                            <p>Comparing aggregate transactional volume (₹ Lakhs)</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-investor-demographics"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>Payment Channel Distribution</h3>
+                            <p>Breakdown of transaction counts across payment gateways</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-payment-methods"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid-card col-span-6">
+                        <div class="card-header">
+                            <h3>State-wise Investment Volume Distribution</h3>
+                            <p>Geographic mapping of investor fund allocations (₹ Crore)</p>
+                        </div>
+                        <div class="chart-container large-chart">
+                            <canvas id="chart-states-investment"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 4: ADVANCED RISK ANALYTICS -->
+            <div id="page-risk" class="dashboard-page">
+                <div class="dashboard-grid">
+                    <!-- Cohort heatmap -->
+                    <div class="grid-card col-span-4">
+                        <div class="card-header">
+                            <h3>Investor Cohort Retention Table (%)</h3>
+                            <p>Percentage of active investors returning in subsequent quarters since joining</p>
+                        </div>
+                        <div class="table-container">
+                            <table class="table cohort-table" id="cohort-heatmap-table">
+                                <thead>
+                                    <!-- Populated by JS -->
+                                </thead>
+                                <tbody>
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SIP At risk status -->
+                    <div class="grid-card col-span-2">
+                        <div class="card-header">
+                            <h3>SIP Continuation Risk Profile</h3>
+                            <p>Active accounts vs at-risk accounts (no transaction for >35 days)</p>
+                        </div>
+                        <div class="chart-container donut-box">
+                            <canvas id="chart-sip-risk"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Sector Concentration HHI -->
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>Sector Concentration (Herfindahl Index - HHI)</h3>
+                            <p>Higher HHI indicates concentrated portfolios; lower represents diversification</p>
+                        </div>
+                        <div class="table-container small-table">
+                            <table class="table table-compact" id="hhi-table">
+                                <thead>
+                                    <tr>
+                                        <th>Scheme Name</th>
+                                        <th class="text-right">HHI</th>
+                                        <th>Risk Class</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- At risk transactions listing -->
+                    <div class="grid-card col-span-3">
+                        <div class="card-header">
+                            <h3>Critical Accounts: Top SIPs at High Risk</h3>
+                            <p>Folios with longest inactivity gaps, flagged for customer retention</p>
+                        </div>
+                        <div class="table-container small-table">
+                            <table class="table table-compact" id="sip-at-risk-table">
+                                <thead>
+                                    <tr>
+                                        <th>Investor ID</th>
+                                        <th>Last Tx Date</th>
+                                        <th class="text-right">Days Inactive</th>
+                                        <th>Retention Flag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 5: RECOMMENDATION ENGINE -->
+            <div id="page-recommendations" class="dashboard-page">
+                <div class="recommendations-container">
+                    <div class="risk-selector-card">
+                        <h3>Select Investor Risk Tolerance Profile</h3>
+                        <p>Matches portfolio assets and recommends top-performing funds by Sharpe Ratio.</p>
+                        
+                        <div class="risk-options">
+                            <button class="risk-opt-btn active" data-risk="Low Risk">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span class="title">Low Risk / Capital Protection</span>
+                                <span class="desc">Liquid and Gilt/Debt Funds</span>
+                            </button>
+                            <button class="risk-opt-btn" data-risk="Moderate Risk">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                                <span class="title">Moderate Risk / Growth</span>
+                                <span class="desc">Large and Flexi Cap Equity Funds</span>
+                            </button>
+                            <button class="risk-opt-btn" data-risk="High Risk">
+                                <i class="fa-solid fa-rocket"></i>
+                                <span class="title">High Risk / Wealth Multiplier</span>
+                                <span class="desc">Small and Mid Cap Equity Funds</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="recommendations-results">
+                        <h3><i class="fa-solid fa-award"></i> Top 3 Recommended Schemes</h3>
+                        <div class="reco-cards-grid" id="recommendations-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- FUND DETAILS MODAL (DRILL THROUGH FEATURE) -->
+    <div class="modal-backdrop" id="details-modal">
+        <div class="modal">
+            <button class="modal-close" id="modal-close-btn">&times;</button>
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <h2 id="modal-scheme-name">HDFC Mid-Cap Opportunities Fund</h2>
+                    <span id="modal-scheme-meta" class="badge">Equity Scheme - Mid Cap</span>
+                </div>
+                <div class="modal-score-card">
+                    <span class="label">Sharpe Ratio</span>
+                    <span class="val" id="modal-sharpe">1.25</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <!-- Left: NAV chart -->
+                    <div class="modal-card col-span-2">
+                        <h3>Historical NAV Trajectory vs 90-Day Rolling Sharpe</h3>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="chart-modal-nav"></canvas>
+                        </div>
+                    </div>
+                    <!-- Right: Performance statistics -->
+                    <div class="modal-card">
+                        <h3>Risk & Return Indicators</h3>
+                        <div class="stat-list">
+                            <div class="stat-item">
+                                <span class="lbl">Fund House (AMC)</span>
+                                <span class="val" id="stat-amc">HDFC Mutual Fund</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="lbl">CAGR (Annualized)</span>
+                                <span class="val highlighted" id="stat-cagr">15.4%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="lbl">Beta (Market Sensitivity)</span>
+                                <span class="val" id="stat-beta">0.92</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="lbl">Alpha (CAPM annual)</span>
+                                <span class="val positive" id="stat-alpha">+2.4%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="lbl">Value at Risk (Daily 95% VaR)</span>
+                                <span class="val negative" id="stat-var">-1.5%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="lbl">Conditional VaR (CVaR)</span>
+                                <span class="val negative" id="stat-cvar">-2.3%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="lbl">Max Historical Drawdown</span>
+                                <span class="val negative" id="stat-drawdown">-18.4%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="lbl">HHI Sector Diversification</span>
+                                <span class="val" id="stat-hhi">1820 (Moderate)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Bottom: Holdings list -->
+                    <div class="modal-card col-span-3">
+                        <h3>Portfolio Assets (Top Stock Allocations)</h3>
+                        <div class="table-container mini-table">
+                            <table class="table table-compact" id="modal-holdings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Stock Name</th>
+                                        <th>Symbol</th>
+                                        <th>Sector</th>
+                                        <th class="text-right">Weight (%)</th>
+                                        <th class="text-right">Current Price (INR)</th>
+                                        <th class="text-right">Market Value (Crores)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Initialization Script -->
+    <script src="app.js"></script>
+</body>
+</html>
