@@ -19,6 +19,15 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_url.path
         query_params = parse_qs(parsed_url.query)
 
+        # Route ping requests to keep server awake
+        if path == "/ping":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "message": "pong"}).encode("utf-8"))
+            return
+
         # Route API requests
         if path.startswith("/api/"):
             self.handle_api(path, query_params)
